@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SCIMOS - Smart Campus System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        .box {
+            background: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>SCIMOS - Smart Campus System</h1>
+
+<div class="container">
+
+    <!-- Student Module -->
+    <div class="box">
+        <h2>Student Record (AVL Simulated)</h2>
+        <input id="sid" placeholder="ID">
+        <input id="sname" placeholder="Name">
+        <button onclick="addStudent()">Add Student</button>
+        <button onclick="showStudents()">Show Students</button>
+        <p id="studentList"></p>
+    </div>
+
+    <!-- Classroom Allocation -->
+    <div class="box">
+        <h2>Classroom Allocation (Greedy)</h2>
+        <input id="students" placeholder="Students Count">
+        <button onclick="allocateRoom()">Allocate Room</button>
+        <p id="roomResult"></p>
+    </div>
+
+    <!-- Complaint System -->
+    <div class="box">
+        <h2>Complaint System (Huffman Simulated)</h2>
+        <input id="complaint" placeholder="Enter Complaint">
+        <button onclick="compress()">Compress</button>
+        <p id="compressed"></p>
+    </div>
+
+</div>
+
+<script>
+
+// ---------------- STUDENT MODULE ----------------
+let students = [];
+
+function addStudent() {
+    let id = document.getElementById("sid").value;
+    let name = document.getElementById("sname").value;
+
+    students.push({id, name});
+
+    alert("Student Added!");
+}
+
+function showStudents() {
+    let output = "";
+    students.forEach(s => {
+        output += `ID: ${s.id}, Name: ${s.name} <br>`;
+    });
+    document.getElementById("studentList").innerHTML = output;
+}
+
+
+// ---------------- GREEDY CLASSROOM ----------------
+function allocateRoom() {
+    let count = document.getElementById("students").value;
+
+    let rooms = [30, 50, 100]; // capacities
+
+    let selected = rooms.find(r => r >= count);
+
+    if(selected) {
+        document.getElementById("roomResult").innerText =
+            "Allocated Room Capacity: " + selected;
+    } else {
+        document.getElementById("roomResult").innerText =
+            "No room available!";
+    }
+}
+
+
+// ---------------- HUFFMAN (SIMULATED) ----------------
+function compress() {
+    let text = document.getElementById("complaint").value;
+
+    let compressed = btoa(text); // base64 (simple demo)
+
+    document.getElementById("compressed").innerText =
+        "Compressed: " + compressed;
+}
+
+</script>
+
+</body>
+</html>
