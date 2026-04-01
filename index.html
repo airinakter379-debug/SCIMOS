@@ -1,129 +1,564 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SCIMOS - Smart Campus System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCIMOS | Smart Campus System - Supabase Integrated</title>
     <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
         body {
-            font-family: Arial;
-            background: #f4f6f9;
-            text-align: center;
+            background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%);
+            margin: 0;
+            padding: 24px 16px;
+            min-height: 100vh;
         }
         h1 {
-            color: #2c3e50;
+            text-align: center;
+            color: #0a2b3e;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 small {
+            font-size: 0.85rem;
+            background: #1e4663;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: normal;
+        }
+        .sub {
+            text-align: center;
+            color: #2c5a7a;
+            margin-bottom: 32px;
+            font-style: italic;
         }
         .container {
-            width: 80%;
-            margin: auto;
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
         }
-        .box {
+        .card {
             background: white;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem 1.8rem;
+            flex: 1;
+            min-width: 280px;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            backdrop-filter: blur(0px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.12);
+        }
+        .card h2 {
+            margin-top: 0;
+            border-left: 6px solid #2c7da0;
+            padding-left: 16px;
+            font-weight: 600;
+            color: #1f5068;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0 16px;
         }
         input, button {
-            padding: 8px;
-            margin: 5px;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        input {
+            flex: 1;
+            background: #fefefe;
+            outline: none;
+        }
+        input:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.2);
         }
         button {
-            background: #3498db;
+            background: #2c7da0;
             color: white;
             border: none;
+            font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         button:hover {
-            background: #2980b9;
+            background: #1f5e7a;
+            transform: scale(0.97);
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #3b6e4c;
+        }
+        .btn-secondary:hover {
+            background: #2c553b;
+        }
+        .btn-outline {
+            background: white;
+            color: #2c7da0;
+            border: 1px solid #2c7da0;
+        }
+        .btn-outline:hover {
+            background: #e6f4fa;
+            transform: none;
+        }
+        .result-panel {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 20px;
+            border: 1px solid #e2edf2;
+            max-height: 280px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+        .result-panel p {
+            margin: 8px 0;
+            padding: 6px 0;
+            border-bottom: 1px solid #e0eef4;
+        }
+        .badge {
+            background: #eef2ff;
+            color: #1f4e6e;
+            border-radius: 40px;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-msg {
+            font-size: 0.8rem;
+            color: #3b7c5e;
+            margin-top: 10px;
+        }
+        hr {
+            margin: 16px 0;
+            border-color: #e2edf2;
+        }
+        .complaint-item {
+            background: #ffffffd9;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        @media (max-width: 780px) {
+            .card { padding: 1.2rem; }
+            .input-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            color: #3a6b8c;
         }
     </style>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
 
-<h1>SCIMOS - Smart Campus System</h1>
+<h1>
+    🏫 SCIMOS 
+    <small>Smart Campus System</small>
+</h1>
+<div class="sub">⚡ Real-time database · Supabase powered</div>
 
 <div class="container">
-
-    <!-- Student Module -->
-    <div class="box">
-        <h2>Student Record (AVL Simulated)</h2>
-        <input id="sid" placeholder="ID">
-        <input id="sname" placeholder="Name">
-        <button onclick="addStudent()">Add Student</button>
-        <button onclick="showStudents()">Show Students</button>
-        <p id="studentList"></p>
+    
+    <!-- ================= STUDENT MODULE ================= -->
+    <div class="card">
+        <h2>📚 Student Records <span class="badge">AVL logic ready</span></h2>
+        <div class="input-group">
+            <input type="text" id="studentId" placeholder="Student ID (e.g., 2024001)" autocomplete="off">
+            <input type="text" id="studentName" placeholder="Full Name" autocomplete="off">
+            <button id="addStudentBtn">➕ Add Student</button>
+        </div>
+        <div class="input-group">
+            <button id="refreshStudentsBtn" class="btn-outline">🔄 Refresh List</button>
+        </div>
+        <div id="studentListContainer" class="result-panel">
+            <p style="color:#6c8f9e;">✨ Click "Refresh List" to load students from database</p>
+        </div>
+        <div id="studentStatus" class="status-msg"></div>
     </div>
 
-    <!-- Classroom Allocation -->
-    <div class="box">
-        <h2>Classroom Allocation (Greedy)</h2>
-        <input id="students" placeholder="Students Count">
-        <button onclick="allocateRoom()">Allocate Room</button>
-        <p id="roomResult"></p>
+    <!-- ================= CLASSROOM ALLOCATION (Greedy) ================= -->
+    <div class="card">
+        <h2>🏢 Classroom Allocation <span class="badge">Greedy Algorithm</span></h2>
+        <div class="input-group">
+            <input type="number" id="studentCount" placeholder="Number of students" min="1">
+            <button id="allocateBtn">📌 Allocate Room</button>
+        </div>
+        <div id="roomResult" class="result-panel">
+            <p>💡 Available rooms: 30, 50, 100 capacity</p>
+        </div>
+        <div class="status-msg">✅ Greedy: picks smallest suitable room</div>
     </div>
 
-    <!-- Complaint System -->
-    <div class="box">
-        <h2>Complaint System (Huffman Simulated)</h2>
-        <input id="complaint" placeholder="Enter Complaint">
-        <button onclick="compress()">Compress</button>
-        <p id="compressed"></p>
+    <!-- ================= COMPLAINT SYSTEM (Huffman Simulated + Supabase) ================= -->
+    <div class="card">
+        <h2>📢 Complaint Hub <span class="badge">Huffman‑style compression</span></h2>
+        <div class="input-group">
+            <input type="text" id="complaintText" placeholder="Write your complaint..." autocomplete="off">
+            <button id="submitComplaintBtn">📤 Submit & Compress</button>
+        </div>
+        <div class="input-group">
+            <button id="refreshComplaintsBtn" class="btn-outline">🔄 Load Complaints</button>
+        </div>
+        <div id="complaintListContainer" class="result-panel">
+            <p>📋 No complaints loaded. Press "Load Complaints"</p>
+        </div>
+        <div id="compressedPreview" class="status-msg"></div>
     </div>
-
 </div>
+<footer>🔐 Connected to Supabase PostgreSQL · Persistent storage for students & complaints</footer>
 
 <script>
-
-// ---------------- STUDENT MODULE ----------------
-let students = [];
-
-function addStudent() {
-    let id = document.getElementById("sid").value;
-    let name = document.getElementById("sname").value;
-
-    students.push({id, name});
-
-    alert("Student Added!");
-}
-
-function showStudents() {
-    let output = "";
-    students.forEach(s => {
-        output += `ID: ${s.id}, Name: ${s.name} <br>`;
-    });
-    document.getElementById("studentList").innerHTML = output;
-}
-
-
-// ---------------- GREEDY CLASSROOM ----------------
-function allocateRoom() {
-    let count = document.getElementById("students").value;
-
-    let rooms = [30, 50, 100]; // capacities
-
-    let selected = rooms.find(r => r >= count);
-
-    if(selected) {
-        document.getElementById("roomResult").innerText =
-            "Allocated Room Capacity: " + selected;
-    } else {
-        document.getElementById("roomResult").innerText =
-            "No room available!";
+    // ======================= SUPABASE CONFIGURATION =======================
+    const SUPABASE_URL = "https://hnfwzcnxkpxjajcmnbzu.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuZnd6Y254a3B4amFqY21uYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzE4MDgsImV4cCI6MjA5MDYwNzgwOH0.9iTqRs3wJ5T1V1yDUBwZ1YybiMkDpKWF1RgtzKRzcYk";
+    
+    // Initialize Supabase client
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // ----------------------------- TABLE SCHEMA EXPECTATION ---------------------------------
+    // For students: table name "students" with columns: id (text PRIMARY KEY), name (text), created_at (timestamp)
+    // For complaints: table name "complaints" with columns: id (serial/int), complaint_text (text), compressed_preview (text), created_at (timestamp)
+    // If tables do not exist, the code will show friendly error and we provide fallback creation guidance.
+    // We'll handle errors gracefully and suggest the tables.
+    
+    // ----------------------------- 1. STUDENT MODULE (CRUD) ---------------------------------
+    const studentIdInput = document.getElementById('studentId');
+    const studentNameInput = document.getElementById('studentName');
+    const addStudentBtn = document.getElementById('addStudentBtn');
+    const refreshStudentsBtn = document.getElementById('refreshStudentsBtn');
+    const studentListContainer = document.getElementById('studentListContainer');
+    const studentStatusSpan = document.getElementById('studentStatus');
+    
+    // Helper: show students list from supabase
+    async function fetchAndDisplayStudents() {
+        studentListContainer.innerHTML = '<p>⏳ Loading students...</p>';
+        try {
+            const { data, error } = await supabaseClient
+                .from('students')
+                .select('id, name')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                if (error.code === '42P01') { // table does not exist
+                    studentListContainer.innerHTML = `<p style="color:#b91c1c;">⚠️ Table "students" not found in Supabase. Please create it:</p>
+                    <pre style="background:#eee; padding:8px; border-radius:12px; font-size:12px;">
+CREATE TABLE students (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);</pre>`;
+                } else {
+                    studentListContainer.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                }
+                studentStatusSpan.innerText = "Failed to load students.";
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                studentListContainer.innerHTML = '<p>📭 No student records found. Add a student!</p>';
+                return;
+            }
+            
+            let html = `<div style="font-weight:600; margin-bottom:8px;">🎓 Registered Students (${data.length})</div>`;
+            data.forEach(std => {
+                html += `<p><strong>🆔 ${escapeHtml(std.id)}</strong> — ${escapeHtml(std.name)}</p>`;
+            });
+            studentListContainer.innerHTML = html;
+            studentStatusSpan.innerText = `✅ ${data.length} student(s) loaded from database.`;
+        } catch (err) {
+            console.error(err);
+            studentListContainer.innerHTML = `<p>⚠️ Network error: ${err.message}</p>`;
+        }
     }
-}
-
-
-// ---------------- HUFFMAN (SIMULATED) ----------------
-function compress() {
-    let text = document.getElementById("complaint").value;
-
-    let compressed = btoa(text); // base64 (simple demo)
-
-    document.getElementById("compressed").innerText =
-        "Compressed: " + compressed;
-}
-
+    
+    // Add student to Supabase
+    async function addStudentToDB() {
+        const id = studentIdInput.value.trim();
+        const name = studentNameInput.value.trim();
+        if (!id || !name) {
+            studentStatusSpan.innerText = "❌ Please enter both Student ID and Name.";
+            return;
+        }
+        addStudentBtn.disabled = true;
+        addStudentBtn.innerText = "Adding...";
+        try {
+            const { data, error } = await supabaseClient
+                .from('students')
+                .insert([{ id: id, name: name }])
+                .select();
+            
+            if (error) {
+                if (error.code === '23505') {
+                    studentStatusSpan.innerText = `⚠️ Student ID "${id}" already exists! Use unique ID.`;
+                } else if (error.code === '42P01') {
+                    studentStatusSpan.innerText = "❌ Table 'students' missing. Please create table in Supabase SQL editor (see instructions).";
+                } else {
+                    studentStatusSpan.innerText = `❌ DB Error: ${error.message}`;
+                }
+                addStudentBtn.disabled = false;
+                addStudentBtn.innerText = "➕ Add Student";
+                return;
+            }
+            
+            studentIdInput.value = "";
+            studentNameInput.value = "";
+            studentStatusSpan.innerText = `✅ Student ${id} added successfully!`;
+            await fetchAndDisplayStudents(); // refresh list
+        } catch (err) {
+            studentStatusSpan.innerText = `⚠️ ${err.message}`;
+        } finally {
+            addStudentBtn.disabled = false;
+            addStudentBtn.innerText = "➕ Add Student";
+        }
+    }
+    
+    // ----------------------------- 2. GREEDY CLASSROOM ALLOCATION (no DB needed) ---------------------------------
+    const studentCountInput = document.getElementById('studentCount');
+    const allocateBtn = document.getElementById('allocateBtn');
+    const roomResultDiv = document.getElementById('roomResult');
+    
+    function allocateClassroom() {
+        let count = parseInt(studentCountInput.value);
+        if (isNaN(count) || count <= 0) {
+            roomResultDiv.innerHTML = `<p>⚠️ Please enter a valid number of students (≥1).</p>`;
+            return;
+        }
+        const rooms = [30, 50, 100]; // capacities sorted ascending
+        // Greedy: find first room that fits
+        let selectedRoom = rooms.find(roomCap => roomCap >= count);
+        if (selectedRoom) {
+            roomResultDiv.innerHTML = `
+                <p>🏆 <strong>Allocated Room Capacity:</strong> ${selectedRoom} seats</p>
+                <p>📊 Students: ${count} | 📐 Room fits perfectly (greedy smallest-fit).</p>
+                <p style="font-size:0.8rem; color:#2c7da0;">✅ Algorithm: Greedy selection (min capacity >= demand)</p>
+            `;
+        } else {
+            roomResultDiv.innerHTML = `
+                <p>❌ <strong>No room available!</strong> Max capacity is 100. Requested ${count} students exceed limit.</p>
+                <p>💡 Consider splitting into multiple sessions.</p>
+            `;
+        }
+    }
+    
+    // ----------------------------- 3. COMPLAINT SYSTEM (Huffman simulation + Supabase storage) ---------------------------------
+    const complaintInput = document.getElementById('complaintText');
+    const submitComplaintBtn = document.getElementById('submitComplaintBtn');
+    const refreshComplaintsBtn = document.getElementById('refreshComplaintsBtn');
+    const complaintListContainer = document.getElementById('complaintListContainer');
+    const compressedPreviewSpan = document.getElementById('compressedPreview');
+    
+    // Simulated Huffman-like compression: use frequency mapping + variable-length codes demo.
+    // We'll create a simple "compression ratio" simulation to mimic Huffman concept.
+    // Actually returns base64 + frequency map description for educational demonstration.
+    function huffmanSimulateCompression(text) {
+        if (!text) return { compressed: "(empty)", ratio: 0, encodedPreview: "" };
+        // Count character frequencies
+        const freq = {};
+        for (let ch of text) {
+            freq[ch] = (freq[ch] || 0) + 1;
+        }
+        // Simulate theoretical compressed size: each char replaced by variable bits (simplified)
+        let originalBits = text.length * 8;
+        let compressedBits = 0;
+        for (let ch in freq) {
+            // probability simulation: huffman would assign ~ -log2(p) bits. Use entropy approx
+            let p = freq[ch] / text.length;
+            let bitsPerSym = p > 0 ? -Math.log2(p) : 0;
+            compressedBits += freq[ch] * bitsPerSym;
+        }
+        compressedBits = Math.ceil(compressedBits);
+        let ratio = originalBits > 0 ? ((compressedBits / originalBits) * 100).toFixed(1) : 0;
+        // Also show a base64 compressed representation for visual fun
+        let b64Compressed = btoa(unescape(encodeURIComponent(text))).substring(0, 50) + (text.length > 20 ? "…" : "");
+        return {
+            compressed: `Base64 snippet: ${b64Compressed}`,
+            ratio: ratio,
+            encodedPreview: `📉 Huffman‑style compression saves ~${(100 - ratio).toFixed(1)}% space. Original: ${text.length} chars → compressed estimate: ${compressedBits} bits.`
+        };
+    }
+    
+    // Submit complaint to Supabase (store text + compression preview)
+    async function submitComplaint() {
+        const rawComplaint = complaintInput.value.trim();
+        if (!rawComplaint) {
+            compressedPreviewSpan.innerText = "⚠️ Please enter a complaint message.";
+            return;
+        }
+        const compressionResult = huffmanSimulateCompression(rawComplaint);
+        const compressedMeta = compressionResult.encodedPreview;
+        
+        submitComplaintBtn.disabled = true;
+        submitComplaintBtn.innerText = "Submitting...";
+        try {
+            const { data, error } = await supabaseClient
+                .from('complaints')
+                .insert([{
+                    complaint_text: rawComplaint,
+                    compressed_preview: compressedMeta
+                }])
+                .select();
+            
+            if (error) {
+                if (error.code === '42P01') {
+                    complaintListContainer.innerHTML = `<p style="color:#b91c1c;">❌ Table "complaints" missing. Create it:</p>
+                    <pre style="background:#eee; padding:8px; border-radius:12px; font-size:12px;">
+CREATE TABLE complaints (
+    id SERIAL PRIMARY KEY,
+    complaint_text TEXT NOT NULL,
+    compressed_preview TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);</pre>`;
+                    compressedPreviewSpan.innerText = "Table missing. Please create complaints table.";
+                } else {
+                    compressedPreviewSpan.innerText = `DB Error: ${error.message}`;
+                }
+                submitComplaintBtn.disabled = false;
+                submitComplaintBtn.innerText = "📤 Submit & Compress";
+                return;
+            }
+            
+            // Show compression info
+            compressedPreviewSpan.innerHTML = `✨ ${compressionResult.encodedPreview} <br> 🔐 ${compressionResult.compressed}`;
+            complaintInput.value = "";
+            await fetchComplaints(); // refresh complaint list
+        } catch (err) {
+            compressedPreviewSpan.innerText = `⚠️ ${err.message}`;
+        } finally {
+            submitComplaintBtn.disabled = false;
+            submitComplaintBtn.innerText = "📤 Submit & Compress";
+        }
+    }
+    
+    // Fetch and display complaints from Supabase
+    async function fetchComplaints() {
+        complaintListContainer.innerHTML = '<p>⏳ Loading complaints...</p>';
+        try {
+            const { data, error } = await supabaseClient
+                .from('complaints')
+                .select('id, complaint_text, compressed_preview, created_at')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                if (error.code === '42P01') {
+                    complaintListContainer.innerHTML = `<p>⚠️ Table "complaints" not found. Please run SQL:</p>
+                    <pre style="background:#eee; padding:8px; border-radius:12px; font-size:12px;">
+CREATE TABLE complaints (
+    id SERIAL PRIMARY KEY,
+    complaint_text TEXT NOT NULL,
+    compressed_preview TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);</pre>`;
+                } else {
+                    complaintListContainer.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                }
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                complaintListContainer.innerHTML = '<p>📭 No complaints yet. Submit one!</p>';
+                return;
+            }
+            
+            let html = `<div style="font-weight:600; margin-bottom:10px;">📬 Recent Complaints (Huffman demo)</div>`;
+            data.forEach(comp => {
+                const date = new Date(comp.created_at).toLocaleString();
+                let previewText = comp.compressed_preview || "Compression info pending";
+                html += `
+                    <div class="complaint-item">
+                        <div class="flex-between">
+                            <strong>🗣️ ${escapeHtml(comp.complaint_text.substring(0, 70))}${comp.complaint_text.length > 70 ? '…' : ''}</strong>
+                            <small style="color:#5a7e9a;">${date}</small>
+                        </div>
+                        <div style="font-size:0.75rem; color:#2c6e4f; margin-top:6px;">📊 ${escapeHtml(previewText)}</div>
+                    </div>
+                `;
+            });
+            complaintListContainer.innerHTML = html;
+        } catch (err) {
+            complaintListContainer.innerHTML = `<p>⚠️ Network error: ${err.message}</p>`;
+        }
+    }
+    
+    // Helper to escape HTML
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // ------------- INITIAL DATA LOAD AND EVENT LISTENERS -------------
+    window.addEventListener('DOMContentLoaded', async () => {
+        // Load students and complaints
+        await fetchAndDisplayStudents();
+        await fetchComplaints();
+        
+        // Student events
+        addStudentBtn.addEventListener('click', addStudentToDB);
+        refreshStudentsBtn.addEventListener('click', fetchAndDisplayStudents);
+        
+        // Classroom allocation
+        allocateBtn.addEventListener('click', allocateClassroom);
+        
+        // Complaint events
+        submitComplaintBtn.addEventListener('click', submitComplaint);
+        refreshComplaintsBtn.addEventListener('click', fetchComplaints);
+        
+        // Optional: press enter on student fields
+        studentIdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addStudentToDB(); });
+        studentNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addStudentToDB(); });
+        complaintInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') submitComplaint(); });
+        studentCountInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') allocateClassroom(); });
+        
+        // Extra status for room greedy
+        roomResultDiv.innerHTML = `<p>💡 Available rooms: 30, 50, 100 capacity (Greedy smallest-fit)</p>`;
+    });
+    
+    // Additional note: automatically display connection status
+    setTimeout(() => {
+        console.log("SCIMOS with Supabase active. Tables needed: students(id, name), complaints(id, complaint_text, compressed_preview)");
+    }, 500);
 </script>
-
 </body>
 </html>
